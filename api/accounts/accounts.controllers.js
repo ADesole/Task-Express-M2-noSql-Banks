@@ -12,7 +12,7 @@ exports.accountCreate = async (req, res) => {
 exports.accountDelete = (req, res) => {
   const { accountId } = req.params;
   try {
-    const foundAccount = await accounts.findById(accountId);
+    const foundAccount = accounts.findById(accountId);
     if (foundAccount) {
       await foundAccount.remove();
       res.status(204).end();
@@ -27,7 +27,7 @@ exports.accountDelete = (req, res) => {
 exports.accountUpdate = async (req, res) => {
   const { accountId } = req.params;
   try {
-    const foundAccount = await accounts.findById(accountId);
+    const foundAccount = accounts.findById(accountId);
     if (foundAccount) {
       await foundAccount.findByIdAndUpdate(accountId, req.body);
       res.status(204).end();
