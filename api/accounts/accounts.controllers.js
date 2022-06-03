@@ -1,36 +1,51 @@
-let accounts = require('../../accounts');
+let accounts = require("../../accounts");
 
-exports.accountCreate = (req, res) => {
-  const id = accounts[accounts.length - 1].id + 1;
-  const newAccount = { ...req.body, funds: 0, id };
-  accounts.push(newAccount);
-  res.status(201).json(newAccount);
+exports.accountCreate = async (req, res) => {
+  try {
+    const newAccount = await accounts.create(req.body);
+    res.status(201).json(newAccount);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
 };
 
 exports.accountDelete = (req, res) => {
   const { accountId } = req.params;
-  const foundAccount = accounts.find((account) => account.id === +accountId);
-  if (foundAccount) {
-    accounts = accounts.filter((account) => account.id !== +accountId);
-    res.status(204).end();
-  } else {
-    res.status(404).json({ message: 'Account not found' });
+  try {
+    const foundAccount = await accounts.findById(accountId);
+    if (foundAccount) {
+      await foundAccount.remove();
+      res.status(204).end();
+    } else {
+      res.status(404).json({ message: "Account not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ err: err.message });
   }
 };
 
-exports.accountUpdate = (req, res) => {
+exports.accountUpdate = async (req, res) => {
   const { accountId } = req.params;
-  const foundAccount = accounts.find((account) => account.id === +accountId);
-  if (foundAccount) {
-    foundAccount.funds = req.body.funds;
-    res.status(204).end();
-  } else {
-    res.status(404).json({ message: 'Account not found' });
+  try {
+    const foundAccount = await accounts.findById(accountId);
+    if (foundAccount) {
+      await foundAccount.findByIdAndUpdate(accountId, req.body);
+      res.status(204).end();
+    } else {
+      res.status(404).json({ message: "Account not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ err: err.message });
   }
 };
 
-exports.accountsGet = (req, res) => {
-  res.json(accounts);
+exports.accountsGet = async (req, res) => {
+  try {
+    const accountAll = await accounts.find();
+    res.json(accountAll);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
 };
 
 exports.getAccountByUsername = (req, res) => {
@@ -38,7 +53,7 @@ exports.getAccountByUsername = (req, res) => {
   const foundAccount = accounts.find(
     (account) => account.username === username
   );
-  if (req.query.currency === 'usd') {
+  if (req.query.currency === "usd") {
     const accountInUsd = { ...foundAccount, funds: foundAccount.funds * 3.31 };
     res.status(201).json(accountInUsd);
   }
