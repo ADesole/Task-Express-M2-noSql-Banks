@@ -14,7 +14,7 @@ exports.accountDelete = (req, res) => {
   try {
     const foundAccount = accounts.findById(accountId);
     if (foundAccount) {
-      await foundAccount.remove();
+      foundAccount.remove();
       res.status(204).end();
     } else {
       res.status(404).json({ message: "Account not found" });
